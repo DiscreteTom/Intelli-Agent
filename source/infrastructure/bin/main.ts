@@ -24,7 +24,7 @@ import { ModelConstruct } from "../lib/model/model-construct";
 import { KnowledgeBaseStack, KnowledgeBaseStackOutputs } from "../lib/knowledge-base/knowledge-base-stack";
 import { PortalConstruct } from "../lib/ui/ui-portal";
 import { UiExportsConstruct } from "../lib/ui/ui-exports";
-import { UserConstruct } from "../lib/user/user-construct";
+// import { UserConstruct } from "../lib/user/user-construct";
 import { ChatStack, ChatStackOutputs } from "../lib/chat/chat-stack";
 
 dotenv.config();
@@ -77,10 +77,10 @@ export class RootStack extends Stack {
       chatStackOutputs = chatStack;
     }
     
-    const userConstruct = new UserConstruct(this, "user", {
-      adminEmail: props.config.email,
-      callbackUrl: portalConstruct.portalUrl,
-    });
+    // const userConstruct = new UserConstruct(this, "user", {
+    //   adminEmail: props.config.email,
+    //   callbackUrl: portalConstruct.portalUrl,
+    // });
 
     const apiConstruct = new ApiConstruct(this, "api-construct", {
       config: props.config,
@@ -88,7 +88,8 @@ export class RootStack extends Stack {
       modelConstructOutputs: modelConstruct,
       knowledgeBaseStackOutputs: knowledgeBaseStackOutputs,
       chatStackOutputs: chatStackOutputs,
-      userConstructOutputs: userConstruct,
+      // userConstructOutputs: userConstruct,
+      email: props.config.email,
     });
     apiConstruct.node.addDependency(sharedConstruct);
     apiConstruct.node.addDependency(modelConstruct);
@@ -105,10 +106,10 @@ export class RootStack extends Stack {
       uiProps: {
         websocket: apiConstruct.wsEndpoint,
         apiUrl: apiConstruct.apiEndpoint,
-        oidcIssuer: userConstruct.oidcIssuer,
-        oidcClientId: userConstruct.oidcClientId,
-        oidcLogoutUrl: userConstruct.oidcLogoutUrl,
-        oidcRedirectUrl: `https://${portalConstruct.portalUrl}/signin`,
+        // oidcIssuer: userConstruct.oidcIssuer,
+        // oidcClientId: userConstruct.oidcClientId,
+        // oidcLogoutUrl: userConstruct.oidcLogoutUrl,
+        // oidcRedirectUrl: `https://${portalConstruct.portalUrl}/signin`,
         kbEnabled: props.config.knowledgeBase.enabled.toString(),
         kbType: JSON.stringify(props.config.knowledgeBase.knowledgeBaseType || {}),
         embeddingEndpoint: modelConstruct.defaultEmbeddingModelName || "",
@@ -127,14 +128,17 @@ export class RootStack extends Stack {
     new CfnOutput(this, "WebSocket Endpoint Address", {
       value: apiConstruct.wsEndpoint,
     });
-    new CfnOutput(this, "OIDC Client ID", {
-      value: userConstruct.oidcClientId,
-    });
-    // new CfnOutput(this, "InitialPassword", {
+    // new CfnOutput(this, "OIDC Client ID", {
     //   value: userConstruct.oidcClientId,
     // });
-    new CfnOutput(this, "User Pool ID", {
-      value: userConstruct.userPool.userPoolId,
+    // // new CfnOutput(this, "InitialPassword", {
+    // //   value: userConstruct.oidcClientId,
+    // // });
+    // new CfnOutput(this, "User Pool ID", {
+    //   value: userConstruct.userPool.userPoolId,
+    // });
+    new CfnOutput(this, "Auth Token", {
+      value: apiConstruct.apiKey,
     });
   }
 }

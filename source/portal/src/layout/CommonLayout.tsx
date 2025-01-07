@@ -11,27 +11,27 @@ import messages from '@cloudscape-design/components/i18n/messages/all.en';
 import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { useTranslation } from 'react-i18next';
 import {
-  ADITIONAL_SETTINGS,
-  ENABLE_TRACE,
-  CURRENT_CHAT_BOT,  
+  // ADITIONAL_SETTINGS,
+  // ENABLE_TRACE,
+  // CURRENT_CHAT_BOT,  
   DEFAULT_ZH_LANG,
   EN_TEXT,
   LANGUAGE_ITEMS,
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
-  USE_CHAT_HISTORY,
-  ONLY_RAG_TOOL,
-  SCENARIO,
-  MODEL_OPTION,
-  MAX_TOKEN,
-  TEMPERATURE,
+  // USE_CHAT_HISTORY,
+  // ONLY_RAG_TOOL,
+  // SCENARIO,
+  // MODEL_OPTION,
+  // MAX_TOKEN,
+  // TEMPERATURE,
 } from 'src/utils/const';
-import { useAuth } from 'react-oidc-context';
+// import { useAuth } from 'react-oidc-context';
 import ConfigContext from 'src/context/config-context';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomBreadCrumb, { BreadCrumbType } from './CustomBreadCrumb';
 import { CustomNavigationItem } from 'src/types';
-const STORAGE_KEYS = [CURRENT_CHAT_BOT, USE_CHAT_HISTORY, ENABLE_TRACE, ONLY_RAG_TOOL, SCENARIO, MODEL_OPTION, MAX_TOKEN, TEMPERATURE, ADITIONAL_SETTINGS]
+// const STORAGE_KEYS = [CURRENT_CHAT_BOT, USE_CHAT_HISTORY, ENABLE_TRACE, ONLY_RAG_TOOL, SCENARIO, MODEL_OPTION, MAX_TOKEN, TEMPERATURE, ADITIONAL_SETTINGS]
 
 interface CommonLayoutProps {
   activeHref: string;
@@ -48,9 +48,9 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
   isLoading,
 }) => {
   const { t, i18n } = useTranslation();
-  const auth = useAuth();
+  // const auth = useAuth();
   const [displayName, setDisplayName] = useState('');
-  const [fullLogoutUrl, setFullLogoutUrl] = useState('');
+  // const [fullLogoutUrl, setFullLogoutUrl] = useState('');
   const config = useContext(ConfigContext);
   const navigate = useNavigate();
 
@@ -58,41 +58,43 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
     i18n.changeLanguage(lng);
   };
 
-  const clearStorage = () => {
-    STORAGE_KEYS.forEach(key => {
-      localStorage.removeItem(key);
-    })
-  }
+  // const clearStorage = () => {
+  //   STORAGE_KEYS.forEach(key => {
+  //     localStorage.removeItem(key);
+  //   })
+  // }
 
   useEffect(() => {
     setDisplayName(
-      auth.user?.profile?.email ||
-        auth.user?.profile?.name ||
-        auth.user?.profile?.preferred_username ||
-        auth.user?.profile?.nickname ||
-        auth.user?.profile?.sub ||
-        '',
+      // auth.user?.profile?.email ||
+      //   auth.user?.profile?.name ||
+      //   auth.user?.profile?.preferred_username ||
+      //   auth.user?.profile?.nickname ||
+      //   auth.user?.profile?.sub ||
+      // TODO: provide a name 
+      '',
     );
-  }, [auth]);
-
-  useEffect(() => {
-    if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
-      changeLanguage(DEFAULT_ZH_LANG);
-    }
-    if (config?.oidcLogoutUrl) {
-      const redirectUrl = config?.oidcRedirectUrl.replace('/signin', '');
-      const queryParams = new URLSearchParams({
-        client_id: config.oidcClientId,
-        id_token_hint: auth.user?.id_token ?? '',
-        logout_uri: redirectUrl,
-        redirect_uri: redirectUrl,
-        post_logout_redirect_uri: redirectUrl,
-      });
-      const logoutUrl = new URL(config?.oidcLogoutUrl);
-      logoutUrl.search = queryParams.toString();
-      setFullLogoutUrl(decodeURIComponent(logoutUrl.toString()));
-    }
+  // }, [auth]);
   }, []);
+
+  // useEffect(() => {
+  //   if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
+  //     changeLanguage(DEFAULT_ZH_LANG);
+  //   }
+  //   if (config?.oidcLogoutUrl) {
+  //     const redirectUrl = config?.oidcRedirectUrl.replace('/signin', '');
+  //     const queryParams = new URLSearchParams({
+  //       client_id: config.oidcClientId,
+  //       id_token_hint: auth.user?.id_token ?? '',
+  //       logout_uri: redirectUrl,
+  //       redirect_uri: redirectUrl,
+  //       post_logout_redirect_uri: redirectUrl,
+  //     });
+  //     const logoutUrl = new URL(config?.oidcLogoutUrl);
+  //     logoutUrl.search = queryParams.toString();
+  //     setFullLogoutUrl(decodeURIComponent(logoutUrl.toString()));
+  //   }
+  // }, []);
 
   const baseItems = [
     {
@@ -149,12 +151,14 @@ const CommonLayout: React.FC<CommonLayoutProps> = ({
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
-                if (fullLogoutUrl) {
-                  auth.removeUser();
-                  clearStorage()
-                  window.location.href = fullLogoutUrl;
-                }
-                auth.removeUser();
+                // if (fullLogoutUrl) {
+                //   auth.removeUser();
+                //   clearStorage()
+                //   window.location.href = fullLogoutUrl;
+                // }
+                // auth.removeUser();
+                window.localStorage.removeItem("authToken");
+                window.location.href = '/';
               }
             },
             items: [{ id: 'signout', text: t('signOut') }],

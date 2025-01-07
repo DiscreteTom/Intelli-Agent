@@ -24,7 +24,7 @@ import {
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { identity } from 'lodash';
 import ConfigContext from 'src/context/config-context';
-import { useAuth } from 'react-oidc-context';
+// import { useAuth } from 'react-oidc-context';
 import {
   LLM_BOT_COMMON_MODEL_LIST,
   LLM_BOT_RETAIL_MODEL_LIST,
@@ -73,7 +73,7 @@ const ChatBot: React.FC<ChatBotProps> = (props: ChatBotProps) => {
   const localScore = localStorage.getItem(SCORE);
   const config = useContext(ConfigContext);
   const { t } = useTranslation();
-  const auth = useAuth();
+  // const auth = useAuth();
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [messages, setMessages] = useState<MessageType[]>([
     {
@@ -87,7 +87,8 @@ const ChatBot: React.FC<ChatBotProps> = (props: ChatBotProps) => {
   ]);
   const [userMessage, setUserMessage] = useState('');
   const { lastMessage, sendMessage, readyState } = useWebSocket(
-    `${config?.websocket}?idToken=${auth.user?.id_token}`,
+    // `${config?.websocket}?idToken=${auth.user?.id_token}`,
+    `${config?.websocket}?idToken=${window.localStorage.getItem("authToken")}`,
     {
       onOpen: () => console.log('opened'),
       shouldReconnect: () => true,
@@ -524,15 +525,17 @@ const ChatBot: React.FC<ChatBotProps> = (props: ChatBotProps) => {
     setCurrentAIMessage('');
     setCurrentMonitorMessage('');
     setIsMessageEnd(false);
-    const groupName: string[] = auth?.user?.profile?.['cognito:groups'] as any;
+    // const groupName: string[] = auth?.user?.profile?.['cognito:groups'] as any;
     let message = {
       query: userMessage,
       entry_type: scenario.value,
       session_id: sessionId,
-      user_id: auth?.user?.profile?.['cognito:username'] || 'default_user_id',
+      // user_id: auth?.user?.profile?.['cognito:username'] || 'default_user_id',
+      user_id: 'default_user_id',
       chatbot_config: {
         max_rounds_in_memory: parseInt(maxRounds),
-        group_name: groupName?.[0] ?? 'Admin',
+        // group_name: groupName?.[0] ?? 'Admin',
+        group_name: 'Admin',
         chatbot_id: chatbotOption.value ?? 'admin',
         goods_id: retailGoods.value,
         chatbot_mode: 'agent',

@@ -27,7 +27,7 @@ import { SharedConstructOutputs } from "../shared/shared-construct";
 import { ModelConstructOutputs } from "../model/model-construct";
 import { KnowledgeBaseStackOutputs } from "../knowledge-base/knowledge-base-stack";
 import { ChatStackOutputs } from "../chat/chat-stack";
-import { UserConstructOutputs } from "../user/user-construct";
+// import { UserConstructOutputs } from "../user/user-construct";
 import { LambdaFunction } from "../shared/lambda-helper";
 import { Constants } from "../shared/constants";
 import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
@@ -43,7 +43,8 @@ interface ApiStackProps extends StackProps {
   modelConstructOutputs: ModelConstructOutputs;
   knowledgeBaseStackOutputs: KnowledgeBaseStackOutputs;
   chatStackOutputs: ChatStackOutputs;
-  userConstructOutputs: UserConstructOutputs;
+  // userConstructOutputs: UserConstructOutputs;
+  email: string;
 }
 
 export class ApiConstruct extends Construct {
@@ -51,6 +52,7 @@ export class ApiConstruct extends Construct {
   public documentBucket: string = "";
   public wsEndpoint: string = "";
   public wsEndpointV2: string = "";
+  public apiKey: string = "";
   private iamHelper: IAMHelper;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
@@ -127,13 +129,16 @@ export class ApiConstruct extends Construct {
       },
     });
 
+    this.apiKey = this.makeApiKey(12);
     const customAuthorizerLambda = new LambdaFunction(this, "CustomAuthorizerLambda", {
       code: Code.fromAsset(join(__dirname, "../../../lambda/authorizer")),
       handler: "custom_authorizer.lambda_handler",
       environment: {
-        USER_POOL_ID: props.userConstructOutputs.userPool.userPoolId,
-        REGION: Aws.REGION,
-        APP_CLIENT_ID: props.userConstructOutputs.oidcClientId,
+        // USER_POOL_ID: props.userConstructOutputs.userPool.userPoolId,
+        // REGION: Aws.REGION,
+        // APP_CLIENT_ID: props.userConstructOutputs.oidcClientId,
+        EMAIL: props.email,
+        API_KEY: this.apiKey,
       },
       layers: [apiLambdaAuthorizerLayer],
       statements: [props.sharedConstructOutputs.iamHelper.logStatement],

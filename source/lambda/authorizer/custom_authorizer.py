@@ -6,18 +6,20 @@ import traceback
 import jwt
 
 # Replace with your Cognito User Pool info
-USER_POOL_ID = os.environ["USER_POOL_ID"]
-REGION = os.environ["REGION"]
-APP_CLIENT_ID = os.environ["APP_CLIENT_ID"]
+# USER_POOL_ID = os.environ["USER_POOL_ID"]
+# REGION = os.environ["REGION"]
+# APP_CLIENT_ID = os.environ["APP_CLIENT_ID"]
+email = os.environ["EMAIL"]
+apiKey = os.environ["API_KEY"]
 verify_exp = os.getenv("mode") != "dev"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-issuer = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}"
-keys_url = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json"
-response = urlopen(keys_url)
-keys = json.loads(response.read())["keys"]
+# issuer = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}"
+# keys_url = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json"
+# response = urlopen(keys_url)
+# keys = json.loads(response.read())["keys"]
 
 
 def generatePolicy(principalId, effect, resource, claims):
@@ -66,32 +68,40 @@ def lambda_handler(event, context):
             # WebSocket API
             token = event["queryStringParameters"]["idToken"]
 
-        headers = jwt.get_unverified_header(token)
-        kid = headers["kid"]
+        if token != apiKey:
+            raise Exception("Unauthorized")
+
+        # headers = jwt.get_unverified_header(token)
+        # kid = headers["kid"]
 
         # Search for the kid in the downloaded public keys
-        key_index = -1
-        for i in range(len(keys)):
-            if kid == keys[i]["kid"]:
-                key_index = i
-                break
-        if key_index == -1:
-            logger.error("Public key not found in jwks.json")
-            raise Exception(
-                "Custom Authorizer Error: Public key not found in jwks.json"
-            )
+        # key_index = -1
+        # for i in range(len(keys)):
+        #     if kid == keys[i]["kid"]:
+        #         key_index = i
+        #         break
+        # if key_index == -1:
+        #     logger.error("Public key not found in jwks.json")
+        #     raise Exception(
+        #         "Custom Authorizer Error: Public key not found in jwks.json"
+        #     )
 
         # Construct the public key
-        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(keys[key_index]))
+        # public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(keys[key_index]))
 
         # Verify the signature of the JWT token
-        claims = jwt.decode(
-            token, public_key, algorithms=["RS256"], audience=APP_CLIENT_ID,
-            issuer=issuer, options={"verify_exp": verify_exp}
-        )
+        # claims = jwt.decode(
+        #     token, public_key, algorithms=["RS256"], audience=APP_CLIENT_ID,
+        #     issuer=issuer, options={"verify_exp": verify_exp}
+        # )
         # reformat claims to align with cognito output
-        claims["cognito:groups"] = ",".join(claims["cognito:groups"])
-        logger.info(claims)
+        # claims["cognito:groups"] = ",".join(claims["cognito:groups"])
+        # logger.info(claims)
+        claims = {
+            "cognito:username": "default_user_id",
+            "cognito:groups": "Admin",
+            "email": email,
+        }
 
         response = generateAllow("me", "*", claims)
         logger.info("Authorized")
