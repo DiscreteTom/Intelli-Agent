@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-
-import { Command } from "commander";
 import { prompt } from "enquirer";
 import * as fs from "fs";
-import * as AWS from "aws-sdk";
+import { Command } from "commander";
+import { STS } from "@aws-sdk/client-sts";
 import {
   SystemConfig,
   SupportedBedrockRegion,
@@ -51,31 +50,33 @@ const llms = [
 
 // Function to get AWS account ID and region
 async function getAwsAccountAndRegion() {
-  const sts = new AWS.STS();
-  let AWS_ACCOUNT;
-  let AWS_REGION;
-  try {
-    const data = await sts.getCallerIdentity().promise();
-    AWS_ACCOUNT = data.Account;
-  } catch (error) {
-    console.error('Error getting AWS account:', error);
-    throw error;
-  }
-  try {
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: "default" });
-    AWS_REGION = new AWS.IniLoader().loadFrom({ isConfig: true }).default.region;
+  let AWS_ACCOUNT: string;
+  let AWS_REGION: string;
 
-  } catch (error) {
-    console.error("No default region found in the AWS credentials file. Please enter the region you want to deploy the intelli-agent solution");
-    AWS_REGION = undefined;
+  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    const sts = new STS({
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+      region: "us-east-1",
+    });
+    AWS_ACCOUNT = (await sts.getCallerIdentity({})).Account!;
+    AWS_REGION = "us-east-1";
+  } else if (process.env.AWS_DEFAULT_REGION) {
+    AWS_REGION = process.env.AWS_DEFAULT_REGION;
+  } else {
+    AWS_REGION = "us-east-1"
   }
+  const sts = new STS({
+    region: AWS_REGION,
+  });
+  AWS_ACCOUNT = (await sts.getCallerIdentity({})).Account!;
 
   console.log("AWS_ACCOUNT", AWS_ACCOUNT);
   console.log("AWS_REGION", AWS_REGION);
   return { AWS_ACCOUNT, AWS_REGION };
-}
-
-
+  }
 
 /**
  * Main entry point
@@ -528,4 +529,3 @@ async function processCreateOptions(options: any): Promise<void> {
     ? createConfig(config)
     : console.log("Skipping");
 }
-
