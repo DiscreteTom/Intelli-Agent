@@ -11,7 +11,7 @@
  *  and limitations under the License.                                                                                *
  *********************************************************************************************************************/
 
-import { Aws, Duration, CustomResource, NestedStack } from "aws-cdk-lib";
+import { Aws, Duration, CustomResource, NestedStack, Stack } from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import { Construct } from "constructs";
@@ -72,7 +72,7 @@ export class ModelConstruct extends NestedStack implements ModelConstructOutputs
   public defaultEmbeddingModelName: string = "";
   public defaultKnowledgeBaseModelName: string = "";
   modelAccount = Aws.ACCOUNT_ID;
-  modelRegion = Aws.REGION;
+  modelRegion = Stack.of(this).region;
   modelIamHelper: IAMHelper;
   modelExecutionRole?: iam.Role = undefined;
   modelImageUrlDomain?: string;
@@ -134,7 +134,7 @@ export class ModelConstruct extends NestedStack implements ModelConstructOutputs
         },
       });
       rule.addTarget(new targets.LambdaFunction(modelTriggerLambda));
- 
+
     }
   }
 
@@ -347,9 +347,13 @@ export class ModelConstruct extends NestedStack implements ModelConstructOutputs
   private initializeSageMakerConfig() {
     this.modelVariantName = "variantProd";
 
-    const isChinaRegion = this.modelRegion === "cn-north-1" || this.modelRegion === "cn-northwest-1";
-    this.modelImageUrlDomain = isChinaRegion ? ".amazonaws.com.cn/" : ".amazonaws.com/";
-    this.modelPublicEcrAccount = isChinaRegion ? "727897471807.dkr.ecr." : "763104351884.dkr.ecr.";
+    if (this.modelRegion.trim().toLowerCase().startsWith("cn") ) {
+      this.modelImageUrlDomain = ".amazonaws.com.cn/";
+      this.modelPublicEcrAccount = "727897471807.dkr.ecr."
+    } else {
+      this.modelImageUrlDomain = ".amazonaws.com/";
+      this.modelPublicEcrAccount = "763104351884.dkr.ecr."
+    }
 
     // Create IAM execution role
     const executionRole = new iam.Role(this, "intelli-agent-endpoint-execution-role", {
@@ -374,4 +378,3 @@ export class ModelConstruct extends NestedStack implements ModelConstructOutputs
   }
 
 }
-

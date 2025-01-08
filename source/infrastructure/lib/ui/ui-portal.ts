@@ -12,16 +12,12 @@
  *********************************************************************************************************************/
 
 import { Construct } from "constructs";
-import * as path from "path";
 import {
-  Aws,
-  Duration,
   aws_cloudfront as cloudfront,
   aws_s3 as s3,
   aws_s3_deployment as s3d,
-  RemovalPolicy,
+  RemovalPolicy
 } from "aws-cdk-lib";
-import { CloudFrontToS3 } from "@aws-solutions-constructs/aws-cloudfront-s3";
 
 export interface PortalConstructOutputs {
   portalBucket: s3.Bucket;
@@ -36,82 +32,63 @@ export class PortalConstruct extends Construct implements PortalConstructOutputs
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
-    const getDefaultBehaviour = () => {
-      return {
-        responseHeadersPolicy: new cloudfront.ResponseHeadersPolicy(
-          this,
-          "ResponseHeadersPolicy",
+
+    // Create S3 bucket
+    this.portalBucket = new s3.Bucket(this, 'PortalBucket', {
+      versioned: false,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+      autoDeleteObjects: false,
+      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+    });
+
+    // Create Origin Access Identity
+    const oai = new cloudfront.OriginAccessIdentity(this, 'MyOriginAccessIdentity');
+    this.portalBucket.grantRead(oai);
+
+    // Create CloudFront distribution
+    const distribution = new cloudfront.CfnDistribution(this, 'MyCloudfrontDistribution', {
+      distributionConfig: {
+        defaultCacheBehavior: {
+          targetOriginId: this.portalBucket.bucketName,
+          viewerProtocolPolicy: 'redirect-to-https',
+          allowedMethods: ['GET', 'HEAD', 'OPTIONS'],
+          cachedMethods: ['GET', 'HEAD', 'OPTIONS'],
+          forwardedValues: {
+            queryString: false,
+            cookies: { forward: 'none' },
+          },
+          minTtl: 0,
+          defaultTtl: 3600,
+          maxTtl: 86400,
+        },
+        enabled: true,
+        httpVersion: 'http2',
+        defaultRootObject: 'index.html',
+        ipv6Enabled: false,
+        priceClass: 'PriceClass_All',
+        origins: [
           {
-            responseHeadersPolicyName: `SecHdr${Aws.REGION}${Aws.STACK_NAME}`,
-            comment: "AI-Customer-Service Security Headers Policy",
-            securityHeadersBehavior: {
-              contentTypeOptions: { override: true },
-              frameOptions: {
-                frameOption: cloudfront.HeadersFrameOption.DENY,
-                override: true,
-              },
-              referrerPolicy: {
-                referrerPolicy: cloudfront.HeadersReferrerPolicy.NO_REFERRER,
-                override: true,
-              },
-              strictTransportSecurity: {
-                accessControlMaxAge: Duration.seconds(600),
-                includeSubdomains: true,
-                override: true,
-              },
-              xssProtection: {
-                protection: true,
-                modeBlock: true,
-                override: true,
-              },
+            id: this.portalBucket.bucketName,
+            domainName: this.portalBucket.bucketRegionalDomainName,
+            s3OriginConfig: {
+              originAccessIdentity: `origin-access-identity/cloudfront/${oai.originAccessIdentityId}`,
             },
           },
-        ),
-      };
-    };
-    // Use cloudfrontToS3 solution constructs
-    const portal = new CloudFrontToS3(this, "UI", {
-      bucketProps: {
-        versioned: false,
-        encryption: s3.BucketEncryption.S3_MANAGED,
-        accessControl: s3.BucketAccessControl.PRIVATE,
-        enforceSSL: true,
-        removalPolicy: RemovalPolicy.RETAIN,
-        autoDeleteObjects: false,
-        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
-      },
-      cloudFrontDistributionProps: {
-        priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
-        minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2019,
-        enableIpv6: false,
-        comment: `${Aws.STACK_NAME} portal (${Aws.REGION})`,
-        enableLogging: true,
-        errorResponses: [
-          {
-            httpStatus: 403,
-            responseHttpStatus: 200,
-            responsePagePath: "/index.html",
-          },
         ],
-        defaultBehavior: getDefaultBehaviour(),
-      },
-      insertHttpSecurityHeaders: false,
-      loggingBucketProps: {
-        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
-      },
-      cloudFrontLoggingBucketProps: {
-        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+        viewerCertificate: {
+          cloudFrontDefaultCertificate: true,
+          minimumProtocolVersion: 'TLSv1.2_2021',
+        },
       },
     });
 
-    this.portalBucket = portal.s3Bucket as s3.Bucket;
-    this.portalUrl = portal.cloudFrontWebDistribution.distributionDomainName;
+    this.portalUrl = distribution.attrDomainName;
 
     // Upload static web assets
     new s3d.BucketDeployment(this, "DeployWebAssets", {
-      sources: [
-        s3d.Source.asset(path.join(__dirname, "../../../portal/dist")),
-      ],
+      sources: [s3d.Source.asset("../portal/dist")],
       destinationBucket: this.portalBucket,
       prune: false,
     });
