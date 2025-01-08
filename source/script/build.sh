@@ -26,8 +26,7 @@ echo "OpenSearch Enabled: $opensearch_enabled"
 echo "Use Open Source Model: $use_open_source_llm"
 echo "Model Assets Bucket: $model_assets_bucket"
 echo "UI Enabled: $ui_enabled"
-
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+docker logout public.ecr.aws || true
 
 prepare_etl_model() {
     echo "Preparing ETL Model"
@@ -89,9 +88,7 @@ if $knowledge_base_enabled && $knowledge_base_intelliagent_enabled && $opensearc
     prepare_online_model
     modules_prepared="${modules_prepared}Online Model, "
 fi
-
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-
+docker logout public.ecr.aws || true
 # Remove the trailing comma and space
 modules_prepared=$(echo "$modules_prepared" | sed 's/, $//')
 
