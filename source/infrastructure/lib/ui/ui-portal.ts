@@ -101,7 +101,11 @@ export class PortalConstruct
           this,
           "LWALayer",
           `arn:${region.startsWith("cn") ? "aws-cn" : "aws"}:lambda:${region}:${
-            region.startsWith("cn") ? "041581134020" : "753240598075"
+            region == "cn-north-1"
+              ? "041581134020"
+              : region == "cn-northwest-1"
+              ? "069767869989"
+              : "753240598075"
           }:layer:LambdaAdapterLayerX86:23`
         ),
         new lambda.LayerVersion(this, "NginxLayer", {
