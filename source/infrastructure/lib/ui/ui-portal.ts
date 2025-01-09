@@ -20,8 +20,18 @@ import {
   aws_lambda as lambda,
   RemovalPolicy,
   Stack,
+  NestedStack,
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+
+export class PortalStack extends NestedStack {
+  public portalConstruct: PortalConstruct;
+
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+    this.portalConstruct = new PortalConstruct(this, "PortalConstruct");
+  }
+}
 
 export interface PortalConstructOutputs {
   portalBucket: s3.Bucket;
@@ -117,7 +127,26 @@ export class PortalConstruct
         PORT: "8080",
       },
     });
+    const awsExportsFn = new lambda.Function(this, "awsExportsFn", {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: "app.handler",
+      memorySize: 1024,
+      environment: {
+        BUCKET: this.portalBucket.bucketName,
+      },
+      code: lambda.Code.fromAsset("../lambda/aws_exports"),
+    });
+    this.portalBucket.grantRead(awsExportsFn);
+
     const apigw = new apigwv2.HttpApi(this, "PortalApi");
+    apigw.addRoutes({
+      path: "/aws-exports.json",
+      methods: [apigwv2.HttpMethod.GET],
+      integration: new HttpLambdaIntegration(
+        "awsExportsIntegration",
+        awsExportsFn
+      ),
+    });
     apigw.addRoutes({
       path: "/{proxy+}",
       methods: [apigwv2.HttpMethod.GET],

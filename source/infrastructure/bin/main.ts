@@ -22,7 +22,7 @@ import { SharedConstruct } from "../lib/shared/shared-construct";
 import { ApiConstruct } from "../lib/api/api-stack";
 import { ModelConstruct } from "../lib/model/model-construct";
 import { KnowledgeBaseStack, KnowledgeBaseStackOutputs } from "../lib/knowledge-base/knowledge-base-stack";
-import { PortalConstruct } from "../lib/ui/ui-portal";
+import { PortalConstruct, PortalStack } from "../lib/ui/ui-portal";
 import { UiExportsConstruct } from "../lib/ui/ui-exports";
 // import { UserConstruct } from "../lib/user/user-construct";
 import { ChatStack, ChatStackOutputs } from "../lib/chat/chat-stack";
@@ -53,7 +53,7 @@ export class RootStack extends Stack {
     });
     modelConstruct.node.addDependency(sharedConstruct);
 
-    const portalConstruct = new PortalConstruct(this, "ui-construct");
+    const portalConstruct = new PortalStack(this, "portal-stack").portalConstruct;
 
     if (props.config.knowledgeBase.enabled && props.config.knowledgeBase.knowledgeBaseType.intelliAgentKb.enabled) {
       knowledgeBaseStack = new KnowledgeBaseStack(this, "knowledge-base-stack", {
