@@ -100,9 +100,9 @@ export class PortalConstruct
         lambda.LayerVersion.fromLayerVersionArn(
           this,
           "LWALayer",
-          `arn:${
-            region.startsWith("cn") ? "aws-cn" : "aws"
-          }:lambda:${region}:753240598075:layer:LambdaAdapterLayerX86:23`
+          `arn:${region.startsWith("cn") ? "aws-cn" : "aws"}:lambda:${region}:${
+            region.startsWith("cn") ? "041581134020" : "753240598075"
+          }:layer:LambdaAdapterLayerX86:23`
         ),
         new lambda.LayerVersion(this, "NginxLayer", {
           code: lambda.Code.fromAsset("./lib/ui/Nginx123X86.zip"),
