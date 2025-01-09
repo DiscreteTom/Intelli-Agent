@@ -118,6 +118,12 @@ class Qwen2Instruct72BRagChain(Qwen2Instruct7BRagChain):
 class Qwen2Instruct72BRagChain(Qwen2Instruct7BRagChain):
     model_id = LLMModelType.QWEN15INSTRUCT32B
 
+class Qwen25Instruct7BRagChain(Qwen2Instruct7BRagChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_7B
+
+class Qwen25Instruct05BRagChain(Qwen2Instruct7BRagChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_0_5B
+
 
 class Baichuan2Chat13B4BitsKnowledgeQaChain(Baichuan2Chat13B4BitsChatChain):
     model_id = LLMModelType.BAICHUAN2_13B_CHAT

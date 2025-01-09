@@ -202,6 +202,12 @@ class Qwen2Instruct72BConversationSummaryChain(ConversationSummaryBaseChain):
 class Qwen2Instruct7BConversationSummaryChain(ConversationSummaryBaseChain):
     model_id = LLMModelType.QWEN2INSTRUCT7B
 
+class Qwen25Instruct7BConversationSummaryChain(ConversationSummaryBaseChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_7B
+
+class Qwen25Instruct05BConversationSummaryChain(ConversationSummaryBaseChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_0_5B
+
 
 class GLM4Chat9BConversationSummaryChain(ConversationSummaryBaseChain):
     model_id = LLMModelType.GLM_4_9B_CHAT

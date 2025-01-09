@@ -28,6 +28,13 @@ export const LLM_BOT_MODEL_LIST = [
 
 export const LLM_BOT_COMMON_MODEL_LIST = [
   {
+    label: 'Qwen',
+    options: [
+      {label: 'qwen2.5-0.5B-instruct', value: 'qwen2.5-0.5B-instruct'},
+      {label: 'qwen2.5-7B-instruct', value: 'qwen2.5-7B-instruct'},
+    ]
+  },
+  {
     label: 'Amazon Nova',
     options: [
       {label: 'us.amazon.nova-pro-v1:0', value: 'us.amazon.nova-pro-v1:0'},

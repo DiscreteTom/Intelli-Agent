@@ -281,6 +281,12 @@ class Qwen2Instruct72BChatChain(Qwen2Instruct7BChatChain):
 class Qwen2Instruct72BChatChain(Qwen2Instruct7BChatChain):
     model_id = LLMModelType.QWEN15INSTRUCT32B
 
+class Qwen25Instruct7BChatChain(Qwen2Instruct7BChatChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_7B
+
+class Qwen25Instruct05BChatChain(Qwen2Instruct7BChatChain):
+    model_id = LLMModelType.QWEN2_5_INSTRUCT_0_5B
+
 
 class ChatGPT35ChatChain(ChatBaseChain):
     model_id = LLMModelType.CHATGPT_35_TURBO_0125

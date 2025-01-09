@@ -38,6 +38,9 @@ EXPORT_MODEL_IDS = [
     LLMModelType.CLAUDE_3_5_SONNET_APAC,
     LLMModelType.CLAUDE_3_HAIKU_APAC,
     LLMModelType.LLAMA3_1_70B_INSTRUCT_US,
+
+    LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+    LLMModelType.QWEN2_5_INSTRUCT_7B,
 ]
 
 EXPORT_SCENES = [
@@ -218,6 +221,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_3_5_SONNET_APAC,
         LLMModelType.CLAUDE_3_HAIKU_APAC,
         LLMModelType.LLAMA3_1_70B_INSTRUCT_US,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
     ],
     task_type=LLMTaskType.RAG,
     prompt_template=CLAUDE_RAG_SYSTEM_PROMPT,
@@ -238,6 +243,8 @@ register_prompt_templates(
     model_ids=[
         LLMModelType.QWEN25_INSTRUCT_72B_AWQ,
         LLMModelType.QWEN2INSTRUCT7B,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.GLM_4_9B_CHAT
     ],
     task_type=LLMTaskType.RAG,
@@ -332,6 +339,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_INSTANCE,
         LLMModelType.MIXTRAL_8X7B_INSTRUCT,
         LLMModelType.QWEN2INSTRUCT7B,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.GLM_4_9B_CHAT,
         LLMModelType.LLAMA3_1_70B_INSTRUCT,
         LLMModelType.LLAMA3_2_90B_INSTRUCT,
@@ -371,6 +380,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_INSTANCE,
         LLMModelType.MIXTRAL_8X7B_INSTRUCT,
         LLMModelType.QWEN2INSTRUCT7B,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.GLM_4_9B_CHAT,
         LLMModelType.LLAMA3_1_70B_INSTRUCT,
         LLMModelType.LLAMA3_2_90B_INSTRUCT,
@@ -411,6 +422,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_INSTANCE,
         LLMModelType.MIXTRAL_8X7B_INSTRUCT,
         LLMModelType.QWEN2INSTRUCT7B,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.GLM_4_9B_CHAT,
         LLMModelType.LLAMA3_1_70B_INSTRUCT,
         LLMModelType.LLAMA3_2_90B_INSTRUCT,
@@ -551,6 +564,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_3_5_HAIKU,
         LLMModelType.NOVA_PRO,
         LLMModelType.QWEN25_INSTRUCT_72B_AWQ,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.NOVA_LITE,
         LLMModelType.NOVA_MICRO,
         LLMModelType.CLAUDE_3_SONNET_US,
@@ -598,6 +613,8 @@ register_prompt_templates(
         LLMModelType.LLAMA3_2_90B_INSTRUCT,
         LLMModelType.MISTRAL_LARGE_2407,
         LLMModelType.LLAMA3_1_70B_INSTRUCT_US,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
     ],
     task_type=LLMTaskType.TOOL_CALLING_API,
     prompt_template=AGENT_SYSTEM_PROMPT_COHERE,
@@ -637,6 +654,8 @@ register_prompt_templates(
         LLMModelType.CLAUDE_3_5_SONNET_APAC,
         LLMModelType.CLAUDE_3_HAIKU_APAC,
         LLMModelType.LLAMA3_1_70B_INSTRUCT_US,
+        LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        LLMModelType.QWEN2_5_INSTRUCT_7B,
         LLMModelType.QWEN25_INSTRUCT_72B_AWQ
     ],
     task_type=LLMTaskType.TOOL_CALLING_API,

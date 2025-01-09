@@ -162,5 +162,7 @@ MODEL_MODULE_LOAD_FN_MAP = {
     LLMModelType.CLAUDE_3_5_SONNET_APAC: _import_bedrock_models,
     LLMModelType.CLAUDE_3_HAIKU_APAC: _import_bedrock_models,
     LLMModelType.LLAMA3_1_70B_INSTRUCT_US: _import_bedrock_models,
-    LLMModelType.QWEN25_INSTRUCT_72B_AWQ: _import_dmaa_models
+    LLMModelType.QWEN25_INSTRUCT_72B_AWQ: _import_dmaa_models,
+    LLMModelType.QWEN2_5_INSTRUCT_7B: _import_dmaa_models,
+    LLMModelType.QWEN2_5_INSTRUCT_0_5B: _import_dmaa_models
 }
