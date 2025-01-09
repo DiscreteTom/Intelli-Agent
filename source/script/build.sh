@@ -47,6 +47,8 @@ build_frontend() {
     echo "Building Frontend"
     cd portal
     npm install && npm run build
+    mkdir -p ../lambda/portal/app
+    cp -r ./dist/* ../lambda/portal/app
     cd - > /dev/null
 }
 

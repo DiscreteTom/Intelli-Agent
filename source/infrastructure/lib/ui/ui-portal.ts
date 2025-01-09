@@ -16,8 +16,12 @@ import {
   aws_cloudfront as cloudfront,
   aws_s3 as s3,
   aws_s3_deployment as s3d,
-  RemovalPolicy
+  aws_apigatewayv2 as apigwv2,
+  aws_lambda as lambda,
+  RemovalPolicy,
+  Stack,
 } from "aws-cdk-lib";
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 export interface PortalConstructOutputs {
   portalBucket: s3.Bucket;
@@ -26,7 +30,10 @@ export interface PortalConstructOutputs {
 /**
  * Construct to provision Portal assets and CloudFront Distribution
  */
-export class PortalConstruct extends Construct implements PortalConstructOutputs {
+export class PortalConstruct
+  extends Construct
+  implements PortalConstructOutputs
+{
   public portalBucket: s3.Bucket;
   public portalUrl: string;
 
@@ -34,7 +41,7 @@ export class PortalConstruct extends Construct implements PortalConstructOutputs
     super(scope, id);
 
     // Create S3 bucket
-    this.portalBucket = new s3.Bucket(this, 'PortalBucket', {
+    this.portalBucket = new s3.Bucket(this, "PortalBucket", {
       versioned: false,
       encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
@@ -44,47 +51,77 @@ export class PortalConstruct extends Construct implements PortalConstructOutputs
     });
 
     // Create Origin Access Identity
-    const oai = new cloudfront.OriginAccessIdentity(this, 'MyOriginAccessIdentity');
-    this.portalBucket.grantRead(oai);
+    // const oai = new cloudfront.OriginAccessIdentity(this, 'MyOriginAccessIdentity');
+    // this.portalBucket.grantRead(oai);
 
     // Create CloudFront distribution
-    const distribution = new cloudfront.CfnDistribution(this, 'MyCloudfrontDistribution', {
-      distributionConfig: {
-        defaultCacheBehavior: {
-          targetOriginId: this.portalBucket.bucketName,
-          viewerProtocolPolicy: 'redirect-to-https',
-          allowedMethods: ['GET', 'HEAD', 'OPTIONS'],
-          cachedMethods: ['GET', 'HEAD', 'OPTIONS'],
-          forwardedValues: {
-            queryString: false,
-            cookies: { forward: 'none' },
-          },
-          minTtl: 0,
-          defaultTtl: 3600,
-          maxTtl: 86400,
-        },
-        enabled: true,
-        httpVersion: 'http2',
-        defaultRootObject: 'index.html',
-        ipv6Enabled: false,
-        priceClass: 'PriceClass_All',
-        origins: [
-          {
-            id: this.portalBucket.bucketName,
-            domainName: this.portalBucket.bucketRegionalDomainName,
-            s3OriginConfig: {
-              originAccessIdentity: `origin-access-identity/cloudfront/${oai.originAccessIdentityId}`,
-            },
-          },
-        ],
-        viewerCertificate: {
-          cloudFrontDefaultCertificate: true,
-          minimumProtocolVersion: 'TLSv1.2_2021',
-        },
+    // const distribution = new cloudfront.CfnDistribution(this, 'MyCloudfrontDistribution', {
+    //   distributionConfig: {
+    //     defaultCacheBehavior: {
+    //       targetOriginId: this.portalBucket.bucketName,
+    //       viewerProtocolPolicy: 'redirect-to-https',
+    //       allowedMethods: ['GET', 'HEAD', 'OPTIONS'],
+    //       cachedMethods: ['GET', 'HEAD', 'OPTIONS'],
+    //       forwardedValues: {
+    //         queryString: false,
+    //         cookies: { forward: 'none' },
+    //       },
+    //       minTtl: 0,
+    //       defaultTtl: 3600,
+    //       maxTtl: 86400,
+    //     },
+    //     enabled: true,
+    //     httpVersion: 'http2',
+    //     defaultRootObject: 'index.html',
+    //     ipv6Enabled: false,
+    //     priceClass: 'PriceClass_All',
+    //     origins: [
+    //       {
+    //         id: this.portalBucket.bucketName,
+    //         domainName: this.portalBucket.bucketRegionalDomainName,
+    //         s3OriginConfig: {
+    //           originAccessIdentity: `origin-access-identity/cloudfront/${oai.originAccessIdentityId}`,
+    //         },
+    //       },
+    //     ],
+    //     viewerCertificate: {
+    //       cloudFrontDefaultCertificate: true,
+    //       minimumProtocolVersion: 'TLSv1.2_2021',
+    //     },
+    //   },
+    // });
+
+    const region = Stack.of(this).region;
+    const lwaFn = new lambda.Function(this, "LwaFn", {
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      handler: "bootstrap",
+      memorySize: 2048,
+      layers: [
+        lambda.LayerVersion.fromLayerVersionArn(
+          this,
+          "LWALayer",
+          `arn:${
+            region.startsWith("cn") ? "aws-cn" : "aws"
+          }:lambda:${region}:753240598075:layer:LambdaAdapterLayerX86:23`
+        ),
+        new lambda.LayerVersion(this, "NginxLayer", {
+          code: lambda.Code.fromAsset("./lib/ui/Nginx123X86.zip"),
+        }),
+      ],
+      code: lambda.Code.fromAsset("../lambda/portal"),
+      environment: {
+        PORT: "8080",
       },
     });
+    const apigw = new apigwv2.HttpApi(this, "PortalApi");
+    apigw.addRoutes({
+      path: "/{proxy+}",
+      methods: [apigwv2.HttpMethod.GET],
+      integration: new HttpLambdaIntegration("lwaFnIntegration", lwaFn),
+    });
 
-    this.portalUrl = distribution.attrDomainName;
+    // this.portalUrl = distribution.attrDomainName;
+    this.portalUrl = apigw.url!;
 
     // Upload static web assets
     new s3d.BucketDeployment(this, "DeployWebAssets", {
