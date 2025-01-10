@@ -143,5 +143,17 @@ MODEL_CONFIGS = {
         default_model_kwargs=BASE_CONFIG.default_model_kwargs.copy(),
         enable_auto_tool_choice=True,
         enable_prefill=True
+    ),
+    LLMModelType.QWEN2_5_INSTRUCT_0_5B: ModelConfig(
+        model_id=LLMModelType.QWEN2_5_INSTRUCT_0_5B,
+        default_model_kwargs=BASE_CONFIG.default_model_kwargs.copy(),
+        enable_auto_tool_choice=True,
+        enable_prefill=True
+    ),
+    LLMModelType.QWEN2_5_INSTRUCT_7B: ModelConfig(
+        model_id=LLMModelType.QWEN2_5_INSTRUCT_7B,
+        default_model_kwargs=BASE_CONFIG.default_model_kwargs.copy(),
+        enable_auto_tool_choice=True,
+        enable_prefill=True
     )
 }
