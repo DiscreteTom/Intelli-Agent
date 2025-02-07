@@ -168,7 +168,7 @@
     "indexUsedByModel": "该索引已经关联了其他的向量化模型",
     "indexRight": "添加索引.",
     "button": {
-      "login": "登录到 AWS 大语言模型机器人",
+      "login": "登录到大语言模型机器人",
       "reload": "重新加载",
       "send": "发送",
       "modelSettings": "模型设置",
